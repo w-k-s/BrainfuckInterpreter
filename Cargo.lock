@@ -1,0 +1,4 @@
+[root]
+name = "brainfuck_interpreter"
+version = "0.1.0"
+

@@ -1,4 +1,5 @@
 use std::env;
+use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -80,19 +81,38 @@ impl Brainfuck{
 	}
 }
 
+impl fmt::Display for Brainfuck{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    	let mut display = String::new();
+      	for (i,value) in self.tape.iter().enumerate(){
+      		let mut value_string : String;
+      		if i == self.tape_head{
+      			value_string = format!("[{}] ",self.tape[i]);
+      		}else{
+      			value_string = format!("{} ",self.tape[i]);
+      		}
+      		display.push_str(&value_string);
+      	}
+      	write!(f,"{}",display)
+    }
+}
+
 fn main() {
-    let file_path = env::args().nth(1).expect("Expected path to brainfuck file");
+    /*let file_path = env::args().nth(1).expect("Expected path to brainfuck file");
     let path = Path::new(&file_path);
     let mut content = String::new();
     let _ = File::open(&path)
     	.and_then(|mut file| file.read_to_string(&mut content))
-    	.map_err(|err| panic!("Failed to read file '{:?}': {}",path.to_str(),err));
+    	.map_err(|err| panic!("Failed to read file '{:?}': {}",path.to_str(),err));*/
 	
+	let source = env::args().nth(1).unwrap_or("".to_string());
+
     let mut brainfuck = Brainfuck::new();
-    match brainfuck.interpret(content){
+    match brainfuck.interpret(&source){
 		Ok(text)=>println!("{}",text),
 		Err(err)=>println!("Error: {}",err)
 	};
+	println!("{}",brainfuck);
 }
 
 #[test]

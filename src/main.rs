@@ -32,10 +32,10 @@ impl Brainfuck{
 
 			let c = tokens[i];
 			if c == '+'{
-				self.tape[self.tape_head] += 1;
+				self.tape[self.tape_head] = self.tape[self.tape_head].wrapping_add(1)
 			}
 			else if c == '-'{
-				self.tape[self.tape_head] -= 1;
+				self.tape[self.tape_head] = self.tape[self.tape_head].wrapping_sub(1)
 			}
 			else if c == '>' {
 				if self.tape_head == self.tape.capacity(){
@@ -70,19 +70,95 @@ impl Brainfuck{
 		}
 		Ok(output.into_iter().collect())
 	}
+
+	fn reset(&mut self)->&mut Brainfuck{
+		self.tape.clear();
+		self.tape_head = 0;
+		self.stack.clear();
+		self.stack_head = 0;
+		return self;
+	}
 }
 
 fn main() {
-    /*let file_path = env::args().nth(1).expect("Expected path to brainfuck file");
+    let file_path = env::args().nth(1).expect("Expected path to brainfuck file");
     let path = Path::new(&file_path);
     let mut content = String::new();
     let _ = File::open(&path)
     	.and_then(|mut file| file.read_to_string(&mut content))
     	.map_err(|err| panic!("Failed to read file '{:?}': {}",path.to_str(),err));
-	*/
+	
     let mut brainfuck = Brainfuck::new();
-    match brainfuck.interpret("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>."){
+    match brainfuck.interpret(content){
 		Ok(text)=>println!("{}",text),
-		Err(err)=>println!("{}",err)
+		Err(err)=>println!("Error: {}",err)
 	};
+}
+
+#[test]
+fn test_add(){
+	let mut brainfuck = Brainfuck::new();
+	let _ = brainfuck.interpret("+++");
+	assert_eq!(brainfuck.tape[0],3);
+}
+
+#[test]
+fn test_sub(){
+	let mut brainfuck = Brainfuck::new();
+	let _ = brainfuck.interpret("++-");
+	assert_eq!(brainfuck.tape[0],1u8);
+}
+
+#[test]
+fn test_signed_sub(){
+	let mut brainfuck = Brainfuck::new();
+	let _ = brainfuck.interpret("---");
+	assert_eq!(brainfuck.tape[0],253u8);
+}
+
+#[test]
+fn test_signed_add(){
+	let mut brainfuck = Brainfuck::new();
+	let _ = brainfuck.interpret("---++++-");
+	assert_eq!(brainfuck.tape[0],0u8);
+}
+
+#[test]
+fn test_shift_left(){
+	let mut brainfuck = Brainfuck::new();
+	let _ = brainfuck.interpret("++>+");
+	assert_eq!(brainfuck.tape[0],2u8);
+	assert_eq!(brainfuck.tape[1],1u8)
+}
+
+#[test]
+fn test_shift_right(){
+	let mut brainfuck = Brainfuck::new();
+	let _ = brainfuck.interpret("+++>++<--");
+	assert_eq!(brainfuck.tape[0],1u8);
+	assert_eq!(brainfuck.tape[1],2u8);
+
+	let r = brainfuck.reset().interpret("<");
+	assert_eq!(r,Err("Data pointer below range"));
+}
+
+#[test]
+fn test_loop(){
+	let mut brainfuck = Brainfuck::new();
+	let _ = brainfuck.interpret("+++[-]+");
+	assert_eq!(brainfuck.tape[0],1);
+}
+
+#[test]
+fn test_mismatched_brackets(){
+	let mut brainfuck = Brainfuck::new();
+	let r = brainfuck.interpret("]");
+	assert_eq!(r,Err("Mismatched brackets"));
+}
+
+#[test]
+fn test_ascii_out(){
+	let mut brainfuck = Brainfuck::new();
+	let r = brainfuck.interpret("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.");
+	assert_eq!(r,Ok("Hello World!\n".to_string()));
 }

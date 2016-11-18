@@ -5,7 +5,7 @@ A Command line interepretor for the [Brainfuck](https://en.wikipedia.org/wiki/Br
 ## Usage
 
 ```sh
-$ git clone https://github.com/waqqas-abdulkareem/BrainfuckInterpreter.git`
+$ git clone https://github.com/waqqas-abdulkareem/BrainfuckInterpreter.git
 $ cd BrainfuckInterpreter
 $ cargo run -- "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>."
 Hello World!
